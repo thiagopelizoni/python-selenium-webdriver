@@ -7,6 +7,8 @@ from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
 from time import sleep
 
 elemental_url = "http://172.16.2.172/users/sign_in"
@@ -14,7 +16,6 @@ elemental_login = "login_here"
 elemental_password = "password_here"
 
 headless = True
-failed = False
 
 def log(message):
     now = datetime.now(pytz.timezone('America/Sao_Paulo')).strftime('%d/%m/%Y %H:%M:%S')
@@ -35,7 +36,7 @@ def get_options():
     return options
 
 def restart_elemental():
-    driver = webdriver.Chrome(executable_path=f"{pathlib.Path(__file__).parent.resolve()}/chromedriver", options=get_options())
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=get_options())
     driver.implicitly_wait(7)
 
     driver.get(elemental_url)
@@ -69,7 +70,7 @@ vimeo_password = "password_here"
 vimeo_event_url = "https://vimeo.com/manage/events/2229728/preview#destinations"
 
 def vimeo():
-    driver = webdriver.Chrome(executable_path=f"{pathlib.Path(__file__).parent.resolve()}/chromedriver", options=get_options())
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=get_options())
     driver.implicitly_wait(10)
 
     driver.get(vimeo_url)
@@ -111,38 +112,6 @@ def get_vimeo_current_video_id():
 
     return driver.current_url.split("/")[-2]
 
-
-wordpress_login_url = "https://www.tvgazeta.com.br/wp-login.php?aadsso_no_redirect=please"
-wordpress_endpoint = "https://www.tvgazeta.com.br/wp-admin/tools.php?page=tvgazeta-streaming-api"
-wordpress_login = "login_here"
-wordpress_password = "password_here"
-
-def wordpress(vimeo_current_video_id):
-    driver = webdriver.Chrome(executable_path=f"{pathlib.Path(__file__).parent.resolve()}/chromedriver", options=get_options())
-    driver.implicitly_wait(7)
-    driver.get(wordpress_login_url)
-    driver.maximize_window()
-    sleep(5)
-
-    user_login = driver.find_element(By.XPATH, "/html/body/div[1]/form/p[1]/input")
-    user_login.send_keys(wordpress_login)
-
-    user_password = driver.find_element(By.XPATH, "/html/body/div[1]/form/div/div/input")
-    user_password.send_keys(wordpress_password)
-
-    submit_login = driver.find_element(By.XPATH, "/html/body/div[1]/form/p[4]/input[1]")
-    submit_login.click()
-
-    driver.get(wordpress_endpoint)
-    vimeo_video_id = driver.find_element(By.XPATH, "/html/body/div[1]/div[2]/div[2]/div[1]/form[2]/label/input")
-    vimeo_video_id.clear()
-    vimeo_video_id.send_keys(vimeo_current_video_id)
-
-    submit_login = driver.find_element(By.XPATH, "/html/body/div[1]/div[2]/div[2]/div[1]/form[2]/p[2]/input")
-    submit_login.click()
-    log(f"Vimeo ID {vimeo_current_video_id} inserido corretamente no Wordpress")
-    sleep(10)
-
 def run():
     try:
         vimeo_end_event()
@@ -154,28 +123,17 @@ def run():
         restart_elemental()
     except:
         log("Erro ao reiniciar o serviço Elemental")
-        failed = True
     sleep(10)
 
     try:
         vimeo_go_live()
     except:
         log("Erro ao reiniciar colocar executar o GoLive")
-        failed = True
     sleep(10)
-
-    try:
-        vimeo_current_video_id = get_vimeo_current_video_id()
-        wordpress(vimeo_current_video_id)
-    except:
-        log("Erro ao inserir o VimeoID no Wordpress")
-        failed = True
 
 def main():
     log("Inicio da execução do robô")
     run()
-    while failed:
-        run()
     log("Fim da execução do robô")
 
 
