@@ -4,30 +4,39 @@ It was a project I did for my company using [Selenium Web Driver](https://www.se
 
 # Requirements
 
-* Python 3.6 or higher ;
+* [Docker](https://docs.docker.com/engine/install/)
+
+# Generating Docker image
+
+```
+docker build -t python-selenium-webdriver .
+```
+
+# Running in a Docker Container
+
+```
+docker run -it --name python-selenium-webdriver -v $(pwd):/srv/robot python-selenium-webdriver:latest
+```
+
+# Running on a GUI environment
+
+### Requirements
+
+* Python 3.7 or higher
 * PIP
 * Google Chrome
-* [Chrome Driver](https://chromedriver.chromium.org/home)
-
-#
-
-```
-python3 -m pip install --user --upgrade pytest selenium;
-```
-
-# Installing Google Chrome on RHEL based systems
-
-```
-wget https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm
-yum localinstall -y google-chrome-stable_current_x86_64.rpm
-```
-
-# Running
 
 In case you're running on an environment that has graphical interface just pass the *--no-headless* to see exactly what's going on.
+
+First of all you need to install all PIP dependencies.
+
+```
+python3 -m pip install --upgrade pip pytest selenium pytz webdriver-manager
+```
+
+After this just run the script with the *--no-headless* to see on your Google Chrome whats doing on.
 
 ```
 python3 robot.py --no-headless
 ```
-
 On servers environments just execute without *--no-headless* param.

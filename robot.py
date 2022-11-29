@@ -128,7 +128,7 @@ def run():
     try:
         vimeo_go_live()
     except:
-        log("Erro ao reiniciar colocar executar o GoLive")
+        log("Erro ao executar o GoLive")
     sleep(10)
 
 def main():
